@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:save_it/features/birthday/UI/screens/home_screen.dart';
+import 'package:save_it/features/birthday/models/birthday.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(BirthdayAdapter());
+  await Hive.openBox<Birthday>('birthday');
+  //   if (Hive.isBoxOpen('notes')) {
+  //   await Hive.box<Note>('notes').close();
+  // }
+
+  // await Hive.deleteBoxFromDisk('notes');
+
   runApp(const MyApp());
 }
 
@@ -14,7 +27,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
       home: HomeScreen(),
     );
   }
