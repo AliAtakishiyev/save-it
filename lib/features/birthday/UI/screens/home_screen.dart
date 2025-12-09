@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:save_it/features/birthday/UI/widgets/birthdays_list.dart';
 import 'package:save_it/features/birthday/UI/widgets/create_birthday_dialog.dart';
 import 'package:save_it/features/birthday/UI/widgets/custom_app_bar.dart';
 import 'package:save_it/features/birthday/UI/widgets/enable_notifications_card.dart';
@@ -16,6 +17,10 @@ class HomeScreen extends StatelessWidget {
             CustomAppBar(),
             SizedBox(height: 32),
             EnableNotificationsCard(),
+
+            SizedBox(height: 24,),
+
+            BirthdaysList(),
           ],
         ),
       ),
@@ -36,12 +41,13 @@ class HomeScreen extends StatelessWidget {
                 colors: [Color(0xffEB6B5F), Color(0xffEC637B)],
               ),
             ),
-            child: Icon(Icons.add),
+            child: Icon(Icons.add,color: Colors.white,),
           ),
           onPressed: () {
+            final parentContext = context; 
             showDialog(
               context: context,
-              builder: (context) => CreateBirthdayDialog(),
+              builder: (context) => CreateBirthdayDialog(rootContext: parentContext),
             );
           },
         ),

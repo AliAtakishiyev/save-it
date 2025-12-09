@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:save_it/features/birthday/providers/birthday_provider.dart';
 
-class CustomAppBar extends StatelessWidget {
+class CustomAppBar extends ConsumerWidget {
   const CustomAppBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext contex, WidgetRef ref) {
+    final birthdays = ref.watch(birthdayProvider);
+
     return SizedBox(
       width: double.infinity,
       child: Padding(
@@ -38,10 +42,18 @@ class CustomAppBar extends StatelessWidget {
             ),
 
             SizedBox(height: 12),
-            Text(
-              "{Your birthday reminder app}",
-              style: TextStyle(fontSize: 18, color: Color(0xff826D60)),
-            ),
+
+            if (birthdays.isEmpty) ...[
+              Text(
+                "Your birthday reminder app",
+                style: TextStyle(fontSize: 18, color: Color(0xff826D60)),
+              ),
+            ] else ...[
+              Text(
+                "Tracking ${birthdays.length} birthday",
+                style: TextStyle(fontSize: 18, color: Color(0xff826D60)),
+              ),
+            ],
           ],
         ),
       ),
