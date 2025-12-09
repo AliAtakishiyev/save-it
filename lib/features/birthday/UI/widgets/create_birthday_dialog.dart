@@ -128,7 +128,7 @@ class _CreateBirthdayDialogState extends ConsumerState<CreateBirthdayDialog> {
                             DateTime? date = await showDatePicker(
                               context: context,
                               firstDate: DateTime(1900),
-                              lastDate: DateTime(2100),
+                              lastDate: DateTime(DateTime.now().year),
                             );
 
                             if (date != null) {

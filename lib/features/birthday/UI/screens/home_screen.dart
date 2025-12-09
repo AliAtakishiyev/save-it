@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:save_it/features/birthday/UI/widgets/birthdays_list.dart';
 import 'package:save_it/features/birthday/UI/widgets/create_birthday_dialog.dart';
 import 'package:save_it/features/birthday/UI/widgets/custom_app_bar.dart';
 import 'package:save_it/features/birthday/UI/widgets/enable_notifications_card.dart';
+import 'package:save_it/features/birthday/UI/widgets/no_birthday_widget.dart';
+import 'package:save_it/features/birthday/providers/birthday_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final birthdays = ref.watch(birthdayProvider);
+
     return Scaffold(
       backgroundColor: Color(0xffFCFBF9),
       body: SafeArea(
@@ -18,9 +23,13 @@ class HomeScreen extends StatelessWidget {
             SizedBox(height: 32),
             EnableNotificationsCard(),
 
-            SizedBox(height: 24,),
-
-            BirthdaysList(),
+            SizedBox(height: 24),
+            if (birthdays.isEmpty) ...[
+              SizedBox(height: 60),
+              NoBirthdayWidget(),
+            ] else ...[
+              BirthdaysList(),
+            ],
           ],
         ),
       ),
@@ -41,13 +50,14 @@ class HomeScreen extends StatelessWidget {
                 colors: [Color(0xffEB6B5F), Color(0xffEC637B)],
               ),
             ),
-            child: Icon(Icons.add,color: Colors.white,),
+            child: Icon(Icons.add, color: Colors.white),
           ),
           onPressed: () {
-            final parentContext = context; 
+            final parentContext = context;
             showDialog(
               context: context,
-              builder: (context) => CreateBirthdayDialog(rootContext: parentContext),
+              builder: (context) =>
+                  CreateBirthdayDialog(rootContext: parentContext),
             );
           },
         ),

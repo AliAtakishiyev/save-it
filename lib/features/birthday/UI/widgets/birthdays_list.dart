@@ -15,7 +15,7 @@ class BirthdaysList extends ConsumerWidget {
       child: ListView.builder(
         itemCount: birthdays.length,
         itemBuilder: (context, index) {
-          int turning = 0;
+          int turning = 1;
           int remainingDay = 0;
 
           final birthday = birthdays[index];
@@ -24,12 +24,6 @@ class BirthdaysList extends ConsumerWidget {
 
           final month = DateFormat("MMMM").format(date!);
           final day = DateFormat("dd").format(date);
-          final year = DateFormat("yyyy").format(date);
-
-          final monthNumeric = date.month; // December -> 11
-          final monthNow = now.month;
-          final dayNow = now.day;
-          final yearNow = int.parse(DateFormat("yyyy").format(DateTime.now()));
 
           // Step 1 — create this year's birthday
           final birthdayThisYear = DateTime(now.year, date.month, date.day);
@@ -50,15 +44,12 @@ class BirthdaysList extends ConsumerWidget {
           // Step 3 — calculate days remaining
           remainingDay = nextBirthday.difference(now).inDays;
 
-
           //final turning = yearNow - int.parse(year!);
           return Padding(
             padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
             child: Card(
               color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: .circular(16),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: .circular(16)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 18,
@@ -67,7 +58,7 @@ class BirthdaysList extends ConsumerWidget {
                 child: Row(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(right: 16,left: 8),
+                      padding: const EdgeInsets.only(right: 16, left: 8),
                       child: CircleAvatar(
                         radius: 30,
                         backgroundColor: Color(0xffFCF0EC),
@@ -97,19 +88,22 @@ class BirthdaysList extends ConsumerWidget {
                       ),
                     ),
 
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Color(0xffF4F0EA),
-                    
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Text(
-                        "$remainingDay Days",
-                        style: TextStyle(fontWeight: .w900, fontSize: 14),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Color(0xffF4F0EA),
+
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Text(
+                          "$remainingDay Days",
+                          style: TextStyle(fontWeight: .w900, fontSize: 14),
+                        ),
                       ),
                     ),
 
