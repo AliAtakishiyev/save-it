@@ -66,6 +66,7 @@ class _CreateBirthdayDialogState extends ConsumerState<CreateBirthdayDialog> {
               ),
               Text(
                 "Save a birthday and get reminded 24 hours before!",
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.normal,
                   fontSize: 16,
@@ -128,7 +129,30 @@ class _CreateBirthdayDialogState extends ConsumerState<CreateBirthdayDialog> {
                             DateTime? date = await showDatePicker(
                               context: context,
                               firstDate: DateTime(1900),
-                              lastDate: DateTime(DateTime.now().year),
+                              lastDate: DateTime.now(),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.light(
+                                      primary: Color(
+                                        0xffF7CE54,
+                                      ), // Header background color
+                                      onPrimary:
+                                          Color(0xffFDFBF8), // Header text color
+                                      onSurface:
+                                          Colors.black, // Default text color
+                                    ),
+
+                                    textButtonTheme: TextButtonThemeData(
+                                      style: TextButton.styleFrom(
+                                        foregroundColor:
+                                            Colors.black, // Buttons (OK/CANCEL)
+                                      ),
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
                             );
 
                             if (date != null) {
