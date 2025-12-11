@@ -111,7 +111,7 @@ class BirthdaysList extends ConsumerWidget {
                       onPressed: () async {
                         await ref
                             .read(birthdayProvider.notifier)
-                            .deleteNote(birthday.key);
+                            .deleteBirthday(birthday.key);
                       },
                       icon: Icon(Icons.delete_outline),
                     ),

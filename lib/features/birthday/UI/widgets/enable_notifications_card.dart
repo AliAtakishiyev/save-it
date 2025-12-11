@@ -1,10 +1,16 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-class EnableNotificationsCard extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:save_it/features/birthday/providers/notification_permission_provider.dart';
+import 'package:save_it/utils/notification_service.dart';
+
+class EnableNotificationsCard extends ConsumerWidget {
   const EnableNotificationsCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16),
       child: SizedBox(
@@ -49,25 +55,85 @@ class EnableNotificationsCard extends StatelessWidget {
                 ),
 
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final granted =
+                        await NotificationService.requestPermission();
+                    if (granted) {
+                      // Permission granted - show success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Notifications enabled!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } else {
+                      // Check if permission is permanently denied (iOS)
+                      if (Platform.isIOS) {
+                        final status = await Permission.notification.status;
+                        if (status.isPermanentlyDenied) {
+                          // Show dialog to open settings
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Please enable notifications in Settings',
+                              ),
+                              backgroundColor: Colors.red,
+                              action: SnackBarAction(
+                                label: 'Open Settings',
+                                textColor: Colors.white,
+                                onPressed: () async {
+                                  await openAppSettings();
+                                },
+                              ),
+                              duration: Duration(seconds: 5),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Permission denied. Please enable in settings.',
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Permission denied. Please enable in settings.',
+                            ),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                    ref.refresh(notificationPermissionProvider);
+
+                  },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.zero,
                     backgroundColor: Color(0xffE66F50),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(16)
-                    )
+                      borderRadius: BorderRadiusGeometry.circular(16),
+                    ),
                   ),
                   child: Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 10,top: 10,bottom: 10),
+                        padding: const EdgeInsets.only(
+                          left: 10,
+                          top: 10,
+                          bottom: 10,
+                        ),
                         child: Icon(
                           Icons.notifications_outlined,
                           color: Colors.white,
                           size: 25,
                         ),
                       ),
-                      SizedBox(width: 8,),
+                      SizedBox(width: 8),
                       Padding(
                         padding: const EdgeInsets.only(right: 10),
                         child: Text(

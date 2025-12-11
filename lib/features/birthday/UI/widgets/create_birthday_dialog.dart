@@ -37,6 +37,8 @@ class _CreateBirthdayDialogState extends ConsumerState<CreateBirthdayDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final birthdays = ref.watch(birthdayProvider);
+
     return Dialog(
       backgroundColor: Color(0xffFDFBF8),
       insetPadding: EdgeInsets.zero,
@@ -137,8 +139,9 @@ class _CreateBirthdayDialogState extends ConsumerState<CreateBirthdayDialog> {
                                       primary: Color(
                                         0xffF7CE54,
                                       ), // Header background color
-                                      onPrimary:
-                                          Color(0xffFDFBF8), // Header text color
+                                      onPrimary: Color(
+                                        0xffFDFBF8,
+                                      ), // Header text color
                                       onSurface:
                                           Colors.black, // Default text color
                                     ),
@@ -209,12 +212,25 @@ class _CreateBirthdayDialogState extends ConsumerState<CreateBirthdayDialog> {
                         child: ElevatedButton(
                           onPressed: () async {
                             if (name.text.isNotEmpty && picked != null) {
-                              await ref
-                                  .read(birthdayProvider.notifier)
-                                  .addNote(name.value.text, picked!);
+                              final exist = birthdays.any(
+                                (b) =>
+                                    b.name!.toLowerCase() ==
+                                    name.text.toLowerCase(),
+                              );
+                              if (exist) {
+                                Fluttertoast.showToast(
+                                  msg: "This name exist!",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                );
+                              } else {
+                                await ref
+                                    .read(birthdayProvider.notifier)
+                                    .addBirthday(name.value.text, picked!);
 
-                              if (mounted) {
-                                Navigator.pop(context);
+                                Future.microtask(() {
+                                  if (mounted) Navigator.pop(context);
+                                });
                               }
                             } else {
                               Fluttertoast.showToast(

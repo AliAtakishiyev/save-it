@@ -6,6 +6,7 @@ import 'package:save_it/features/birthday/UI/widgets/custom_app_bar.dart';
 import 'package:save_it/features/birthday/UI/widgets/enable_notifications_card.dart';
 import 'package:save_it/features/birthday/UI/widgets/no_birthday_widget.dart';
 import 'package:save_it/features/birthday/providers/birthday_provider.dart';
+import 'package:save_it/features/birthday/providers/notification_permission_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -13,6 +14,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final birthdays = ref.watch(birthdayProvider);
+    final notificationPermission = ref.watch(notificationPermissionProvider);
 
     return Scaffold(
       backgroundColor: Color(0xffFCFBF9),
@@ -21,7 +23,17 @@ class HomeScreen extends ConsumerWidget {
           children: [
             CustomAppBar(),
             SizedBox(height: 32),
-            EnableNotificationsCard(),
+
+            notificationPermission.when(
+              data: (isGranted) {
+                if (!isGranted) {
+                  return EnableNotificationsCard();
+                }
+                return SizedBox.shrink();
+              },
+              loading: () => SizedBox.shrink(),
+              error: (_, __) => EnableNotificationsCard(),
+            ),
 
             SizedBox(height: 24),
             if (birthdays.isEmpty) ...[

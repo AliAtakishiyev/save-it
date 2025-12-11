@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:save_it/features/birthday/UI/screens/home_screen.dart';
 import 'package:save_it/features/birthday/models/birthday.dart';
+import 'package:save_it/utils/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,8 @@ void main() async {
 
   // await Hive.deleteBoxFromDisk('notes');
 
+  await NotificationService.initialize(); // initialize notifications
+  await NotificationService.initTimeZone();
   runApp(ProviderScope(child: MyApp()));
 }
 
@@ -28,7 +31,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: HomeScreen(),
     );
   }
