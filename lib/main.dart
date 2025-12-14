@@ -18,7 +18,6 @@ void main() async {
   // await Hive.deleteBoxFromDisk('notes');
 
   await NotificationService.initialize(); // initialize notifications
-  await NotificationService.initTimeZone();
   runApp(ProviderScope(child: MyApp()));
 }
 

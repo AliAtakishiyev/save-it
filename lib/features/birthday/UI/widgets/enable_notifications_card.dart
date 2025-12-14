@@ -58,37 +58,57 @@ class EnableNotificationsCard extends ConsumerWidget {
                   onPressed: () async {
                     final granted =
                         await NotificationService.requestPermission();
+
                     if (granted) {
-                      // Permission granted - show success message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Notifications enabled!'),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
+                      // Invalidate provider to force rebuild
+                      ref.invalidate(notificationPermissionProvider);
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Notifications enabled!'),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
                     } else {
                       // Check if permission is permanently denied (iOS)
                       if (Platform.isIOS) {
+                        
                         final status = await Permission.notification.status;
-                        if (status.isPermanentlyDenied) {
-                          // Show dialog to open settings
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Please enable notifications in Settings',
+
+                        if (context.mounted) {
+                          if (status.isPermanentlyDenied) {
+                            // Show dialog to open settings
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Please enable notifications in Settings',
+                                ),
+                                backgroundColor: Colors.red,
+                                action: SnackBarAction(
+                                  label: 'Open Settings',
+                                  textColor: Colors.white,
+                                  onPressed: () async {
+                                    await openAppSettings();
+                                  },
+                                ),
+                                duration: Duration(seconds: 5),
                               ),
-                              backgroundColor: Colors.red,
-                              action: SnackBarAction(
-                                label: 'Open Settings',
-                                textColor: Colors.white,
-                                onPressed: () async {
-                                  await openAppSettings();
-                                },
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Permission denied. Please enable in settings.',
+                                ),
+                                backgroundColor: Colors.red,
                               ),
-                              duration: Duration(seconds: 5),
-                            ),
-                          );
-                        } else {
+                            );
+                          }
+                        }
+                      } else {
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
@@ -98,19 +118,10 @@ class EnableNotificationsCard extends ConsumerWidget {
                             ),
                           );
                         }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Permission denied. Please enable in settings.',
-                            ),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
                       }
-                    }
-                    ref.refresh(notificationPermissionProvider);
 
+                      ref.invalidate(notificationPermissionProvider);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.zero,

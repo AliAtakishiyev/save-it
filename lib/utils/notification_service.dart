@@ -10,12 +10,22 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
+  static bool _isInitialized = false;
+  static bool get isInitialized => _isInitialized;
+
   static Future<void> initialize() async {
+    if (_isInitialized) return;
+
+    //Timezone Initialiation (Must be first)
+    tz.initializeTimeZones();
+    tz.setLocalLocation(tz.local);
+
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
+
     const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: false,  // Don't auto-request, let user trigger it
+      requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
     );
@@ -48,11 +58,8 @@ class NotificationService {
         // Handle notification tap
       },
     );
-  }
 
-  static Future<void> initTimeZone() async {
-    tz.initializeTimeZones();
-    // tz.local will automatically use the system's local timezone
+    _isInitialized = true;
   }
 
   static Future<bool> requestPermission() async {
@@ -82,17 +89,17 @@ class NotificationService {
       if (iosImplementation != null) {
         // Check current status first
         final currentStatus = await Permission.notification.status;
-        
+
         // If already granted, return true
         if (currentStatus.isGranted) {
           return true;
         }
-        
+
         // If permanently denied, can't request again
         if (currentStatus.isPermanentlyDenied) {
           return false;
         }
-        
+
         // Request permissions through flutter_local_notifications
         final result = await iosImplementation.requestPermissions(
           alert: true,
@@ -101,9 +108,20 @@ class NotificationService {
         );
 
         if (result == true) {
+          // Wait for permission_handler to sync with flutter_local_notifications
+          // They can be out of sync on iOS
+          for (int i = 0; i < 10; i++) {
+            await Future.delayed(Duration(milliseconds: 200));
+            final status = await Permission.notification.status;
+            if (status.isGranted) {
+              return true;
+            }
+          }
+          // If still not synced after 2 seconds, return true anyway
+          // since flutter_local_notifications confirmed it
           return true;
         }
-        
+
         // Check status again after request
         final newStatus = await Permission.notification.status;
         return newStatus.isGranted;
@@ -117,7 +135,7 @@ class NotificationService {
       if (status.isPermanentlyDenied) {
         return false;
       }
-      
+
       final requestedStatus = await Permission.notification.request();
       return requestedStatus.isGranted;
     }
@@ -130,6 +148,9 @@ class NotificationService {
     required DateTime birthDate,
     required String message,
   }) async {
+    if (!await isPermissionGranted()) {
+      return;
+    }
     final now = DateTime.now();
 
     // Calculate this year's birthday
@@ -155,41 +176,27 @@ class NotificationService {
       return;
     }
 
-    const androidDetails = AndroidNotificationDetails(
-      'birthday_channel',
-      'Birthday Reminders',
-      channelDescription: 'Notifications for upcoming birthdays',
-      priority: Priority.high,
-      importance: Importance.high,
-      playSound: true,
-    );
-
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    final details = NotificationDetails(
-      iOS: iosDetails,
-      android: androidDetails,
-    );
-
     await _notifications.zonedSchedule(
       id,
       'Birthday Reminder',
       message.replaceAll('{name}', name),
       tzNotificationTime,
-      details,
-      androidScheduleMode: AndroidScheduleMode.inexact,
+      _details(), //buna bax
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.dateAndTime,
+      matchDateTimeComponents: null,
     );
   }
 
   static Future<void> cancelNotification(int id) async {
-    await _notifications.cancel(id); //hiveId
+    try{
+      if(id > 0){
+        await _notifications.cancel(id);
+      }
+    }catch(e){
+      print(e);
+    }
   }
 
   static Future<bool> isPermissionGranted() async {
@@ -198,5 +205,22 @@ class NotificationService {
       return status.isGranted;
     }
     return false;
+  }
+
+  static NotificationDetails _details() {
+    return const NotificationDetails(
+      android: AndroidNotificationDetails(
+        'birthday_channel',
+        'Birthday Reminders',
+        channelDescription: 'Notifications for upcoming birthdays',
+        importance: Importance.high,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+    );
   }
 }

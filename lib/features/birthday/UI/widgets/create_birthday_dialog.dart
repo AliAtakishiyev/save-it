@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:save_it/features/birthday/providers/birthday_provider.dart';
+import 'package:save_it/utils/notification_service.dart';
 
 class CreateBirthdayDialog extends ConsumerStatefulWidget {
   final BuildContext rootContext;
@@ -35,7 +36,7 @@ class _CreateBirthdayDialogState extends ConsumerState<CreateBirthdayDialog> {
     super.dispose();
   }
 
-  @override
+  
   Widget build(BuildContext context) {
     final birthdays = ref.watch(birthdayProvider);
 
@@ -223,14 +224,22 @@ class _CreateBirthdayDialogState extends ConsumerState<CreateBirthdayDialog> {
                                   toastLength: Toast.LENGTH_SHORT,
                                   gravity: ToastGravity.BOTTOM,
                                 );
-                              } else {
-                                await ref
-                                    .read(birthdayProvider.notifier)
-                                    .addBirthday(name.value.text, picked!);
+                                return;
+                              } 
 
-                                Future.microtask(() {
-                                  if (mounted) Navigator.pop(context);
-                                });
+                              try{
+                                await ref.read(birthdayProvider.notifier).addBirthday(name.text, picked!);
+
+                                if(mounted){
+                                  Navigator.pop(context);
+                                }
+                              }catch(e){
+                                print(e);
+                                Fluttertoast.showToast(
+                                  msg: "Failed to add birthday",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                );
                               }
                             } else {
                               Fluttertoast.showToast(

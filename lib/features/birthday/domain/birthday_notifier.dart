@@ -17,12 +17,17 @@ class BirthdayNotifier extends Notifier<List<Birthday>> {
 
     final birthday = state.last;
 
-    await NotificationService.scheduleBirthdayNotification(
-      id: birthday.key,
-      name: name,
-      birthDate: date,
-      message: 'Don\'t forget! $name\'s birthday is tomorrow! 🎉',
-    );
+    try {
+      await NotificationService.scheduleBirthdayNotification(
+        id: birthday.key,
+        name: name,
+        birthDate: date,
+        message: 'Don\'t forget! $name\'s birthday is tomorrow! 🎉',
+      );
+    } catch (e) {
+      // Notification failed (Samsung device issue) but birthday was added successfully
+      print('Notification scheduling failed: $e');
+    }
   }
 
   Future<void> deleteBirthday(int hiveId) async {
