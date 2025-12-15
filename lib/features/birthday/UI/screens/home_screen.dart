@@ -16,8 +16,6 @@ class HomeScreen extends ConsumerWidget {
     final birthdays = ref.watch(birthdayProvider);
     final notificationPermission = ref.watch(notificationPermissionProvider);
 
-
-
     return Scaffold(
       backgroundColor: Color(0xffFCFBF9),
       body: SafeArea(
@@ -27,17 +25,12 @@ class HomeScreen extends ConsumerWidget {
             SizedBox(height: 32),
 
             notificationPermission.when(
-              data: (isGranted) {
-                if (!isGranted) {
-                  return EnableNotificationsCard();
-                }
-                return SizedBox.shrink();
-              },
-              loading: () => SizedBox.shrink(),
-              error: (_, __) => EnableNotificationsCard(),
+              data: (isGranted) => isGranted
+                  ? const SizedBox.shrink()
+                  : const EnableNotificationsCard(),
+              loading: () => const EnableNotificationsCard(),
+              error: (_, __) => const EnableNotificationsCard(),
             ),
-
-            
 
             SizedBox(height: 24),
             if (birthdays.isEmpty) ...[
